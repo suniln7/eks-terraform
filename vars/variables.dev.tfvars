@@ -4,7 +4,7 @@ cluster_version = "1.29"
 # Create new Public KEY
 
 eks_pub_ssh_key = "ssh-rsa Adjlhdsbckjsdbcoisdhnckdc76ttsd6tc76"
-vpc_id          = "vpc-0f8"
+vpc_id          = "vpc-0703c0dcb945a26b9"
 
 private_subnets = ["10.40.2.0/24", "10.40.1.0/24", "10.40.3.0/24", "10.40.13.0/24"]
 public_subnets  = ["10.40.107.0/24", "10.40.108.0/24", "10.40.109.0/24"]
