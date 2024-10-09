@@ -1,0 +1,99 @@
+image:
+  name: hashicorp/terraform:1.9.7
+  entrypoint: [""]
+
+stages:
+  - check
+  - plan
+  - apply
+  - destroy
+
+before_script: []
+
+
+
+tf-fmt:
+  stage: check
+  script:
+    - terraform fmt
+    - terraform init -input=false -backend=false
+    - terraform validate
+
+
+.tf-plan-template: &tf-plan-template
+  stage: plan
+  variables:
+    VARS: "-var-file=./vars/variables.${ENV}.tfvars"
+    
+  before_script:
+    - apk --no-cache add jq
+    - apk --no-cache add curl
+    - alias convert_report="jq -r '([.resource_changes[]?.change.actions?]|flatten)|{\"create\":(map(select(.==\"create\"))|length),\"update\":(map(select(.==\"update\"))|length),\"delete\":(map(select(.==\"delete\"))|length)}'"
+  script:
+    - terraform init -input=false
+    - terraform workspace select -or-create $WORKSPACE 
+    - terraform plan -out=${ENV}.tfplan $VARS
+    - terraform show --json ${ENV}.tfplan | convert_report > ${ENV}.json
+  artifacts:
+    reports:
+      terraform: ${ENV}.json
+    paths:
+      - ./*.tfplan
+    expire_in: 1 week
+
+
+  
+
+.tf-plan-dev:
+  variables:
+    ENV: dev
+    WORKSPACE: dev 
+  extends: [.tf-plan-template]
+  environment: $ENV
+  only:
+    refs:
+      - dev
+
+.tf-apply-template: &tf-apply-template
+  stage: apply
+  variables:
+    PLAN_FILE: ${ENV}.tfplan
+    VARS: "-var-file=./vars/variables.${ENV}.tfvars"
+  script:
+    - terraform init -input=false 
+    - terraform workspace select $WORKSPACE 
+    - terraform apply -auto-approve ${PLAN_FILE}
+  dependencies:
+    - tf-plan-dev 
+  when: manual
+
+.tf-apply-dev:
+  variables:
+    ENV: dev
+    WORKSPACE: dev
+  extends: [.tf-apply-template]
+  environment: dev
+  only:
+    refs:
+      - dev
+
+.tf-destroy-template: &tf-destroy-template
+  stage: destroy
+  variables:
+    VARS: "-var-file=./vars/variables.${ENV}.tfvars"
+  script:
+    - terraform init -input=false 
+    - terraform workspace select $WORKSPACE 
+    - terraform plan -out=${ENV}.tfplan $VARS
+    - terraform destroy -auto-approve $VARS
+  when: manual
+  
+.tf-destroy-dev:
+  variables:
+    ENV: dev
+    WORKSPACE: dev
+  extends: [.tf-destroy-template]
+  environment: dev
+  only:
+    refs:
+      - dev
