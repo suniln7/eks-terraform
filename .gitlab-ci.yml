@@ -84,11 +84,10 @@ tf-apply-dev:
   script:
     - terraform init -input=false 
     - terraform workspace select $WORKSPACE 
-    - terraform plan -out=${ENV}.tfplan $VARS
     - terraform destroy -auto-approve $VARS
   when: manual
   
-.tf-destroy-dev:
+tf-destroy-dev:
   variables:
     ENV: dev
     WORKSPACE: dev
