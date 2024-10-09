@@ -44,7 +44,7 @@ tf-fmt:
 
   
 
-.tf-plan-dev:
+tf-plan-dev:
   variables:
     ENV: dev
     WORKSPACE: dev 
@@ -67,7 +67,7 @@ tf-fmt:
     - tf-plan-dev 
   when: manual
 
-.tf-apply-dev:
+tf-apply-dev:
   variables:
     ENV: dev
     WORKSPACE: dev

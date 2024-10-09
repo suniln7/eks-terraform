@@ -6,14 +6,14 @@ terraform {
     }
   }
 
-  #   backend "s3" {
-  #     key     = "eks/terraform.tfstate"
-  #     region  = "us-east-1"
-  #     bucket  = "bucketname"
-  #     profile = "default"
-  #     # region = "ap-south-1"
+    backend "s3" {
+      key     = "eks/terraform.tfstate"
+      region  = "us-east-1"
+      bucket  = "skn-gitlab-tf-backend"
+      # profile = "default"
+      # region = "ap-south-1"
 
-  #     # profile = "dev"
-  #   }
+      # profile = "dev"
+    }
 
 }
